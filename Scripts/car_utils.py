@@ -1,16 +1,19 @@
-def save_env_parameters(filename, envparams):
+from car_utils import Env_Params
+
+def save_env_parameters(filename, envparams: Env_Params):
     paramlist = [envparams.step_limit, envparams.step_size, envparams.maxspeed,
                           envparams.acceleration, envparams.random_pos, envparams.binary_reward]
     try:
         f = open("../Envparameters/envparameters_" + filename, "x")
         f.write(str(paramlist))
         f.close()
+        print("saved envparameters to file.")
     except:
         print("envparameters couldn't be saved. They are:" +
             str(paramlist))
 
 
-def load_env_parameters(filename):
+def load_env_parameters(filename) -> Env_Params:
 
     # Load signal parameters from file:
     f = open("../Envparameters/envparameters_" + filename, "r")
