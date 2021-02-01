@@ -87,11 +87,11 @@ car_utils.save_env_parameters(defender_name, defender_params)
 
 
 # Initialize multi-agent environments with environment parameters and enemy models:
-env2 = MultiEnv(random_pos=defender_params.random_pos,step_limit=defender_params.step_limit, step_size = defender_params.step_size, maxspeed = defender_params.maxspeed,acceleration=defender_params.acceleration, binary_reward= defender_params.binary_reward, isEscaping= True, enemy_model = attacker_model, enemy_step_limit= attacker_params.step_limit, enemy_step_size= attacker_params.step_size, enemy_maxspeed= attacker_params.maxspeed, enemy_acceleration= attacker_params.acceleration)
-env = MultiEnv(random_pos=attacker_params.random_pos,step_limit=attacker_params.step_limit, step_size = attacker_params.step_size, maxspeed = attacker_params.maxspeed,acceleration=attacker_params.acceleration, binary_reward= attacker_params.binary_reward, isEscaping= False, enemy_model = defender_model, enemy_step_limit= defender_params.step_limit, enemy_step_size= defender_params.step_size, enemy_maxspeed= defender_params.maxspeed, enemy_acceleration= defender_params.acceleration)
+defender_env = MultiEnv(random_pos=defender_params.random_pos,step_limit=defender_params.step_limit, step_size = defender_params.step_size, maxspeed = defender_params.maxspeed,acceleration=defender_params.acceleration, binary_reward= defender_params.binary_reward, isEscaping= True, enemy_model = attacker_model, enemy_step_limit= attacker_params.step_limit, enemy_step_size= attacker_params.step_size, enemy_maxspeed= attacker_params.maxspeed, enemy_acceleration= attacker_params.acceleration)
+attacker_env = MultiEnv(random_pos=attacker_params.random_pos,step_limit=attacker_params.step_limit, step_size = attacker_params.step_size, maxspeed = attacker_params.maxspeed,acceleration=attacker_params.acceleration, binary_reward= attacker_params.binary_reward, isEscaping= False, enemy_model = defender_model, enemy_step_limit= defender_params.step_limit, enemy_step_size= defender_params.step_size, enemy_maxspeed= defender_params.maxspeed, enemy_acceleration= defender_params.acceleration)
 
-vectorized_env = DummyVecEnv([lambda: env])
-vectorized_env2 = DummyVecEnv([lambda: env2])
+vectorized_env = DummyVecEnv([lambda: attacker_env])
+vectorized_env2 = DummyVecEnv([lambda: defender_env])
 
 attacker_model.set_env(vectorized_env)
 defender_model.set_env(vectorized_env2)
@@ -116,14 +116,14 @@ for i in range(1, 10000):
         # If preview is turned on, every so often the agents demonstrate what they have learned:
         if(showPreview):
             for i in range(5):
-                obs = env.reset()
+                obs = attacker_env.reset()
                 for i in range(attacker_params.step_limit):
                     action, _states = attacker_model.predict(obs)
                     print(action)
-                    obs, rewards, dones, info = env.step(action)
-                    env.renderSlow(200)
+                    obs, rewards, dones, info = attacker_env.step(action)
+                    attacker_env.renderSlow(200)
                     if(dones):
-                        env.renderSlow(1)
+                        attacker_env.renderSlow(1)
                         break
 
 

@@ -120,8 +120,6 @@ class CustomEnv(gym.Env):
 
 
     else:
-        
-
         #print ("distance = " + str(distance))
 
         if(self.binaryReward):
@@ -152,8 +150,6 @@ class CustomEnv(gym.Env):
     self.myRender.setObjects([self.myCar, self.enemy_car])
 
     self.observation = self.getObservation()
-    #observation = [self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]]#, self.myCar.speed, self.myCar.rotation]
-
 
     return self.observation  # reward, done, info can't be included
 
