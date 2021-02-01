@@ -10,16 +10,30 @@ from stable_baselines.common.schedules import ConstantSchedule, LinearSchedule
 from car_gym_environment import CustomEnv
 from multicar_gym_environment import CustomEnv as MultiEnv
 import car_utils
+from my_dynamic_learning_rate import ExpLearningRate
 
-timesteps_per_turn = 100000 #attacker_step_limit*100
+timesteps_per_turn = 10000
 
 defender_model_folder = "../Models/"
 attacker_model_folder = "../Models/"
 attacker_tensorboard_folder = "../TensorboardLogs/"
 defender_tensorboard_folder = "../TensorboardLogs/"
 
-scheduler = LinearSchedule(timesteps_per_turn, 0.001, 0.0001)
-my_learning_rate2 = scheduler.value # 0.0005 
+# scheduler = LinearSchedule(timesteps_per_turn, 0.001, 0.0001)
+# my_learning_rate = scheduler.value # 0.0005 
+
+# for dynamic LRs:
+timesteps = 100000
+lr_start = 0.001
+lr_end = 0.000063
+half_life = 0.1
+dyn_lr = ExpLearningRate(
+    timesteps=timesteps, lr_start=lr_start, lr_min=lr_end, half_life=half_life, save_interval=timesteps_per_turn)
+my_learning_rate = dyn_lr.value # 0.0005  # 0.000063 #scheduler.value # 0.0005 default: 2.5e-4=0.00025
+#scheduler = LinearSchedule(schedule_timesteps= timesteps,initial_p= lr_start, final_p = lr_end)
+
+#print_LR = str(my_learning_rate) 
+print_LR = str(lr_start) + "-" + str(lr_end)
 
 attacker_step_limit = 200
 attacker_turnrate = 0.01745*(11.25/2)
@@ -33,7 +47,7 @@ attacker_params = car_utils.Env_Params(attacker_step_limit, attacker_turnrate, a
 # Initialize stub environment to break vicious circle
 stub_env = MultiEnv(random_pos= attacker_random_pos, step_limit=attacker_step_limit, step_size = 0, maxspeed = 0,acceleration=0, binary_reward= attacker_binaryReward, isEscaping= False, enemy_model = 0, enemy_step_limit= 0, enemy_step_size= 0, enemy_maxspeed= 0, enemy_acceleration= 0)
 
-attacker_model = PPO2(MlpPolicy, stub_env, learning_rate= my_learning_rate2, verbose=1, tensorboard_log=attacker_tensorboard_folder)
+attacker_model = PPO2(MlpPolicy, stub_env, learning_rate= my_learning_rate, verbose=1, tensorboard_log=attacker_tensorboard_folder)
 
 
 
@@ -53,11 +67,11 @@ defender_env = MultiEnv(random_pos=defender_params.random_pos,step_limit=defende
 
 # Custom names for the to-be-trained models
 defender_name = "New_DEFENDER_" + "ep_length_" + str(defender_params.step_limit) + "turnrate_" + str(
-    defender_params.step_size) + "maxspeed_" + str(defender_params.maxspeed) + "randomBall_" + str(defender_params.random_pos) + "binaryReward_" + str(defender_params.binary_reward)
+    defender_params.step_size) + "maxspeed_" + str(defender_params.maxspeed) + "randomPos_" + str(defender_params.random_pos) + "binaryReward_" + str(defender_params.binary_reward)
 attacker_name = "New_ATTACKER_" +  "ep_length_" + str(attacker_params.step_limit) + "turnrate_" + str(
-    attacker_params.step_size) + "maxspeed_" + str(attacker_params.maxspeed) + "randomBall_" + str(attacker_params.random_pos) + "binaryReward_" + str(attacker_params.binary_reward)
+    attacker_params.step_size) + "maxspeed_" + str(attacker_params.maxspeed) + "randomPos_" + str(attacker_params.random_pos) + "binaryReward_" + str(attacker_params.binary_reward)
  
-defender_model = PPO2(MlpPolicy, defender_env, learning_rate= my_learning_rate2, verbose=1, tensorboard_log=defender_tensorboard_folder)
+defender_model = PPO2(MlpPolicy, defender_env, learning_rate= my_learning_rate, verbose=1, tensorboard_log=defender_tensorboard_folder)
 
 attacker_env = MultiEnv(random_pos=attacker_params.random_pos,step_limit=attacker_params.step_limit, step_size = attacker_params.step_size, maxspeed = attacker_params.maxspeed,acceleration=attacker_params.acceleration, binary_reward= attacker_params.binary_reward, isEscaping= False, enemy_model = defender_model, enemy_step_limit= defender_params.step_limit, enemy_step_size= defender_params.step_size, enemy_maxspeed= defender_params.maxspeed, enemy_acceleration= defender_params.acceleration)
 vectorized_attacker_env = DummyVecEnv([lambda: attacker_env])
@@ -67,7 +81,7 @@ car_utils.save_env_parameters(attacker_name, attacker_params)
 car_utils.save_env_parameters(defender_name, defender_params)
 
 # Init learning
-attacker_model.learn(total_timesteps=5000, tb_log_name= attacker_name + "INIT")
+attacker_model.learn(total_timesteps=10000, tb_log_name= attacker_name + "INIT")
 
 showPreview = True
 

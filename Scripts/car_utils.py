@@ -1,5 +1,4 @@
-from car_utils import Env_Params
-
+from env_params_class import Env_Params
 def save_env_parameters(filename, envparams: Env_Params):
     paramlist = [envparams.step_limit, envparams.step_size, envparams.maxspeed,
                           envparams.acceleration, envparams.random_pos, envparams.binary_reward]
@@ -34,11 +33,4 @@ def load_env_parameters(filename) -> Env_Params:
 
 
 
-class Env_Params:
-    def __init__(self, step_limit, step_size, maxspeed, acceleration, random_pos, binary_reward):
-        self.step_limit = step_limit
-        self.step_size = step_size
-        self.maxspeed = maxspeed
-        self.acceleration = acceleration
-        self.random_pos = random_pos
-        self.binary_reward = binary_reward
+

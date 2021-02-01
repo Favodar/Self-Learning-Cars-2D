@@ -74,7 +74,7 @@ class CustomEnv(gym.Env):
     self.enemy_car.move(enemy_action[0], enemy_action[1])
     self.myCar.move(action[0], action[1])
 
-    #self.renderSlow(50)
+    self.renderSlow(50)
 
     self.observation = self.getObservation()
 

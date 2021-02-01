@@ -96,7 +96,7 @@ vectorized_env2 = DummyVecEnv([lambda: defender_env])
 attacker_model.set_env(vectorized_env)
 defender_model.set_env(vectorized_env2)
 
-scheduler = LinearSchedule(timesteps, 0.001, 0.0001)
+# scheduler = LinearSchedule(timesteps, 0.001, 0.0001)
 my_learning_rate2 = 0.0005 #scheduler.value
 
 showPreview = True
