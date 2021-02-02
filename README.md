@@ -4,7 +4,7 @@
 ```[a1, a2]```  
   
 a1 = [0/1/2] = throttle [no/half/full]  
-a2 = [0/1/2] = steer [left/straight/right]
+a2 = [0/1/2] = steer [left/straight/right]  
 all action values are integers.
 
 #### Observation space
