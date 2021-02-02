@@ -12,18 +12,18 @@ from multicar_gym_environment import CustomEnv as MultiEnv
 import car_utils
 from my_dynamic_learning_rate import ExpLearningRate
 
-timesteps_per_turn = 10000
+timesteps_per_turn = 100000
 
 defender_model_folder = "../Models/"
 attacker_model_folder = "../Models/"
-attacker_tensorboard_folder = "../TensorboardLogs/"
-defender_tensorboard_folder = "../TensorboardLogs/"
+attacker_tensorboard_folder = "../TensorboardLogs/reset-num-false"
+defender_tensorboard_folder = "../TensorboardLogs/reset-num-false"
 
 # scheduler = LinearSchedule(timesteps_per_turn, 0.001, 0.0001)
 # my_learning_rate = scheduler.value # 0.0005 
 
 # for dynamic LRs:
-timesteps = 100000
+timesteps = 1000000
 lr_start = 0.001
 lr_end = 0.000063
 half_life = 0.1
@@ -39,8 +39,8 @@ attacker_step_limit = 200
 attacker_turnrate = 0.01745*(11.25/2)
 attacker_maxspeed = 2.5
 attacker_acceleration = 2.5/2
-attacker_random_pos = True
-attacker_binaryReward = True
+attacker_random_pos = False
+attacker_binaryReward = False
 
 attacker_params = car_utils.Env_Params(attacker_step_limit, attacker_turnrate, attacker_maxspeed, attacker_acceleration, attacker_random_pos, attacker_binaryReward)
 
@@ -51,14 +51,14 @@ attacker_model = PPO2(MlpPolicy, stub_env, learning_rate= my_learning_rate, verb
 
 
 
-print("CARS_PPO2_MULTIAGENT.py LESS GO")
+print("new_car_multi_ppo2.py")
 
 defender_step_limit = attacker_step_limit
 defender_turnrate = attacker_turnrate*2
-defender_maxspeed = attacker_maxspeed*1.2
-defender_acceleration = attacker_acceleration*0.9
-defender_random_pos = True
-defender_binary_reward = True
+defender_maxspeed = attacker_maxspeed*0.8
+defender_acceleration = attacker_acceleration*0.8
+defender_random_pos = False
+defender_binary_reward = False
 
 defender_params = car_utils.Env_Params(defender_step_limit, defender_turnrate, defender_maxspeed, defender_acceleration, defender_random_pos, defender_binary_reward)
 
@@ -66,9 +66,9 @@ defender_params = car_utils.Env_Params(defender_step_limit, defender_turnrate, d
 defender_env = MultiEnv(random_pos=defender_params.random_pos,step_limit=defender_params.step_limit, step_size = defender_params.step_size, maxspeed = defender_params.maxspeed,acceleration=defender_params.acceleration, binary_reward= defender_params.binary_reward, isEscaping= True, enemy_model = attacker_model, enemy_step_limit= attacker_params.step_limit, enemy_step_size= attacker_params.step_size, enemy_maxspeed= attacker_params.maxspeed, enemy_acceleration= attacker_params.acceleration)
 
 # Custom names for the to-be-trained models
-defender_name = "New_DEFENDER_" + "ep_length_" + str(defender_params.step_limit) + "turnrate_" + str(
+defender_name = "NewSmoothReward_DEFENDER_" + "ep_length_" + str(defender_params.step_limit) + "turnrate_" + str(
     defender_params.step_size) + "maxspeed_" + str(defender_params.maxspeed) + "randomPos_" + str(defender_params.random_pos) + "binaryReward_" + str(defender_params.binary_reward)
-attacker_name = "New_ATTACKER_" +  "ep_length_" + str(attacker_params.step_limit) + "turnrate_" + str(
+attacker_name = "NewSmoothReward_ATTACKER_" +  "ep_length_" + str(attacker_params.step_limit) + "turnrate_" + str(
     attacker_params.step_size) + "maxspeed_" + str(attacker_params.maxspeed) + "randomPos_" + str(attacker_params.random_pos) + "binaryReward_" + str(attacker_params.binary_reward)
  
 defender_model = PPO2(MlpPolicy, defender_env, learning_rate= my_learning_rate, verbose=1, tensorboard_log=defender_tensorboard_folder)
@@ -81,17 +81,19 @@ car_utils.save_env_parameters(attacker_name, attacker_params)
 car_utils.save_env_parameters(defender_name, defender_params)
 
 # Init learning
-attacker_model.learn(total_timesteps=10000, tb_log_name= attacker_name + "INIT")
+attacker_model.learn(total_timesteps=200000, tb_log_name= attacker_name + "INIT")
+attacker_model.learn(total_timesteps=1000, tb_log_name= attacker_name + "INIT2", reset_num_timesteps= True)
 
 showPreview = True
 
 for i in range(1, 10000):
-    defender_model.learn(total_timesteps=timesteps_per_turn, tb_log_name= defender_name + str(i), log_interval=100)
-    attacker_model.learn(total_timesteps= timesteps_per_turn, tb_log_name= attacker_name + str(i), log_interval=100)
+    defender_model.learn(total_timesteps=timesteps_per_turn, tb_log_name= defender_name, log_interval=100, reset_num_timesteps=False)
+    attacker_model.learn(total_timesteps= timesteps_per_turn, tb_log_name= attacker_name, log_interval=100, reset_num_timesteps=False)
+    dyn_lr.count()
 
     if(i%10==0):
-        attacker_model.save(attacker_model_folder + attacker_name+str(i))
-        defender_model.save(defender_model_folder + defender_name+str(i))
+        attacker_model.save(attacker_model_folder + attacker_name+str(i*timesteps_per_turn))
+        defender_model.save(defender_model_folder + defender_name+str(i*timesteps_per_turn))
         
         # If preview is turned on, every so often the agents demonstrate what they have learned:
         if(showPreview):

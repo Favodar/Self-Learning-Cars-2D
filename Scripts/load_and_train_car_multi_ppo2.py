@@ -10,6 +10,7 @@ from stable_baselines.common.schedules import ConstantSchedule, LinearSchedule
 from car_gym_environment import CustomEnv
 from multicar_gym_environment import CustomEnv as MultiEnv
 import car_utils
+from my_dynamic_learning_rate import ExpLearningRate
 
 """
 This script loads pretrained attacker and defender models and lets them take turns in training against the most recent enemy model
@@ -37,7 +38,7 @@ attacker_original_model = PPO2.load(attacker_model_folder +
                                     attacker_filename + attacker_model_iteration)
 
 # Display a few example episodes with the loaded attacker model
-showAttackerPreview = True
+showAttackerPreview = False
 if(showAttackerPreview):
     for i in range(5):
         obs = env.reset()
@@ -73,14 +74,16 @@ if(customParameters):
     attacker_params.acceleration = attacker_params.acceleration/2
 
 
-timesteps = 10000
+
 
 # Custom names for the to-be-trained models
-defender_name = "DEFENDER_foxbunny_" + "ep_length_" + str(defender_params.step_limit) + "turnrate_" + str(
+defender_name = "DEFENDER_ExpLR2asdfs_" + "ep_length_" + str(defender_params.step_limit) + "turnrate_" + str(
     defender_params.step_size) + "maxspeed_" + str(defender_params.maxspeed) + "randomBall_" + str(defender_params.random_pos) + "binaryReward_" + str(defender_params.binary_reward)
-attacker_name = "ATTACKER_foxbunny_" +  "ep_length_" + str(attacker_params.step_limit) + "turnrate_" + str(
+attacker_name = "ATTACKER_ExpLR2asdfs_" +  "ep_length_" + str(attacker_params.step_limit) + "turnrate_" + str(
     attacker_params.step_size) + "maxspeed_" + str(attacker_params.maxspeed) + "randomBall_" + str(attacker_params.random_pos) + "binaryReward_" + str(attacker_params.binary_reward)
-   
+
+attacker_tensorboard_folder = "../TensorboardLogs/reset-num-false"
+defender_tensorboard_folder = "../TensorboardLogs/reset-num-false"   
 
 car_utils.save_env_parameters(attacker_name, attacker_params)
 car_utils.save_env_parameters(defender_name, defender_params)
@@ -96,22 +99,46 @@ vectorized_env2 = DummyVecEnv([lambda: defender_env])
 attacker_model.set_env(vectorized_env)
 defender_model.set_env(vectorized_env2)
 
+attacker_model.tensorboard_log = attacker_tensorboard_folder
+defender_model.tensorboard_log = defender_tensorboard_folder
+
+timesteps_per_turn = 200000
 # scheduler = LinearSchedule(timesteps, 0.001, 0.0001)
-my_learning_rate2 = 0.0005 #scheduler.value
+my_learning_rate = 0.0005 #scheduler.value
+
+dynamicLR = True
+if(dynamicLR):
+    # for dynamic LRs:
+    timesteps = 1000000
+    lr_start = 0.0005
+    lr_end = 0.000063
+    half_life = 0.2
+    dyn_lr = ExpLearningRate(
+        timesteps=timesteps, lr_start=lr_start, lr_min=lr_end, half_life=half_life, save_interval=timesteps_per_turn)
+    my_learning_rate = dyn_lr.value
+
+attacker_model.learning_rate = my_learning_rate
+defender_model.learning_rate = my_learning_rate 
 
 showPreview = True
+
+
 
 # The training process
 for i in range(1, 10000):
     # Defender and attacker take turns in training (stable baselines does not support multiagent training)
-    defender_model.learn(total_timesteps=timesteps, tb_log_name= defender_name + str(i), log_interval=100)
-    attacker_model.learn(total_timesteps= timesteps//2, tb_log_name= attacker_name + str(i), log_interval=100)
+    attacker_model.learn(total_timesteps= timesteps_per_turn, tb_log_name= attacker_name + str(i), log_interval=100)
+    defender_model.learn(total_timesteps=timesteps_per_turn, tb_log_name= defender_name + str(i), log_interval=100)
+    
+    
+    if(dynamicLR):
+        dyn_lr.count()
 
     if(i%2==0):
         attacker_model.save(
-            "../Models/" + attacker_name+str(i*timesteps))
+            "../Models/" + attacker_name+str(i*timesteps_per_turn))
         defender_model.save(
-            "../Models/" + defender_name+str(i*timesteps))
+            "../Models/" + defender_name+str(i*timesteps_per_turn))
         
         # If preview is turned on, every so often the agents demonstrate what they have learned:
         if(showPreview):

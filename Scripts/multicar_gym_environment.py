@@ -74,7 +74,7 @@ class CustomEnv(gym.Env):
     self.enemy_car.move(enemy_action[0], enemy_action[1])
     self.myCar.move(action[0], action[1])
 
-    self.renderSlow(50)
+    #self.renderSlow(50)
 
     self.observation = self.getObservation()
 
@@ -83,8 +83,8 @@ class CustomEnv(gym.Env):
 
     self.step_counter += 1
 
-    # if(self.episode_counter%50==0):
-    #     self.renderSlow(400)
+    if(self.episode_counter%30==0):
+        self.renderSlow(400)
 
     done = (self.episodeIsOver|(self.step_counter>=self.step_limit))
 
@@ -139,7 +139,7 @@ class CustomEnv(gym.Env):
         return reward
 
   def reset(self):
-    self.render()
+    #self.render()
 
     self.step_counter = 0
     self.episodeIsOver = False
