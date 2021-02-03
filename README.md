@@ -8,17 +8,18 @@ The main goals where to explore the effects on agent behaviour and performance o
 - different action spaces
 
 
-In brief this repository provides two things:  
+In brief, this repository provides two things:  
 - a reinforcement learning environment (implementing the common OpenAI Gym standard)
-- scripts for executing training, meaning: setting up the rl-algorithm (imported from stable-baselines), initializing the environment, starting and logging the training, saving & loading the trained models and the environment parameters
+- scripts for executing training
 #### The Gym Environment
 
 #### The Training Scripts
-
+The scripts that start with "MAIN" are the ones that have to be executed in order to start the training process. They set up or load the agent (imported from stable-baselines), initializing the environment, starting and logging the training, saving & loading the trained models and the environment parameters
 <img src="Pictures/architecture.svg"/>
 
 
 #### Action space
+```MultiDiscrete```  
 ```[a1, a2]```  
   
 a1 = [0/1/2] = throttle [no/half/full]  
