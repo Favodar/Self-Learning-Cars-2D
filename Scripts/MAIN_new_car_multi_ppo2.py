@@ -7,8 +7,8 @@ from stable_baselines.common.vec_env import DummyVecEnv
 from stable_baselines import PPO2
 from stable_baselines.common.schedules import ConstantSchedule, LinearSchedule
 
-from car_gym_environment import CustomEnv
-from multicar_gym_environment import CustomEnv as MultiEnv
+from ENV_car_gym_environment import CustomEnv
+from ENV_multicar_gym_environment import CustomEnv as MultiEnv
 import car_utils
 from my_dynamic_learning_rate import ExpLearningRate
 
