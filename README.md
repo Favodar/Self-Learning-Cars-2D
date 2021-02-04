@@ -1,5 +1,5 @@
 # Self-Learning-Cars-2D
-A toy environment for reinforcement learning. In the single-agent version, a car is given the task of driving to a randomly assigned target. In the multi-agent version, one car chases and the other car tries to escape.  
+A toy environment for reinforcement learning (a goal-oriented machine learning technique). In the single-agent version, a car is given the task of driving to a randomly assigned target. In the multi-agent version, one car chases and the other car tries to escape.  
 In brief, this repository provides two things:  
 - a reinforcement learning environment (implementing the common OpenAI Gym standard) (see 1.1 for more information)
 - scripts for executing succesful training with PPO (HER + SAC in the works) (see 1.2 for more information)
