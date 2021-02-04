@@ -10,11 +10,13 @@ The main goals where to explore the effects on agent behaviour and performance o
 
 In brief, this repository provides two things:  
 - a reinforcement learning environment (implementing the common OpenAI Gym standard)
-- scripts for executing training
-#### The Gym Environment
+- scripts for executing training with PPO (HER + SAC in the works)
+### The Gym Environment
 
-#### The Training Scripts
-The scripts that start with "MAIN" are the ones that have to be executed in order to start the training process. They set up or load the agent (imported from stable-baselines), initializing the environment, starting and logging the training, saving & loading the trained models and the environment parameters
+### The Training Scripts
+The scripts that start with "MAIN" are the ones that have to be executed in order to start the training process. They set up or load the agents (imported from stable-baselines), initializing the environment, starting and logging the training, saving & loading the trained models and the environment parameters.  
+#### Multi Agent/Attacker and Escaper
+In the case of "multi-agent" training, two agents take turns in training, since stable-baselines does not support true multi-agent training (where multiple agents learn from the same episodes). The way I set this up here is by initializing two environments, one for the attacker and one for the escaper. The constructor for the environment gets passed an argument that determines the role of the agent. ```isEscaping=True``` would mean the agent being trained is the escaper. The environment constructor also requires an enemy model, so the agent can actually train against an adversery. It would seem like there might be an infinite regress problem here, because an agent needs an adversery to start training but the adversary needs and adversary to need training and so on - but because an untrained model is a valid model that already has a policy (even though a random one), training can be started without issue.
 <img src="Pictures/architecture.svg"/>
 
 
