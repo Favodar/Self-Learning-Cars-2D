@@ -21,7 +21,7 @@ If you're interested in learning from this project, you could either only downlo
 <img src="Pictures/architecture.svg"/>  
 
 ### 1.1 The Gym Environment
-The scripts that start with "ENV"
+The scripts that start with "ENV". They are reinforcement learning environments, which means they are a Markov-decision-process. By implementing the common OpenAI Gym standard, they are compatible with many algorithms, like the RL-library "stable-baselines", which I used in the training scripts.
 ### 1.2 The Training Scripts
 The scripts that start with "MAIN" are the ones that have to be executed in order to start the training process. They set up or load the agents (imported from stable-baselines), initializing the environment, starting and logging the training, saving & loading the trained models and the environment parameters.  
 #### 1.2.1 Multi Agent/Attacker and Escaper
