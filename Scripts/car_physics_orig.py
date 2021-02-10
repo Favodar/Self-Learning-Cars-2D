@@ -29,8 +29,6 @@ class Car(Object2D):
         self.acceleration = acceleration
 
         self.rotation = rotation
-        self.rotation_vector_x = np.sin(self.rotation)
-        self.rotation_vector_y = np.cos(self.rotation)
         self.coordinates = np.array([[x_pos, y_pos],])
         self.speed = 0
 
@@ -42,7 +40,7 @@ class Car(Object2D):
     def move(self, gaspedal = 0, rotate = 0):
 
         # If gaspedal is pushed accelerate, else deccelerate
-        if(gaspedal>0):
+        if(gaspedal!=0):
             self.speed+=(self.acceleration*gaspedal)
         elif(self.speed>0):
             self.speed-=(self.acceleration)
@@ -53,14 +51,15 @@ class Car(Object2D):
         elif(self.speed < 0):
             self.speed = 0
             
-        
-        self.rotation += (rotate-1)*self.rotation_step_size
+        if(rotate==0):
+            self.rotation -= self.rotation_step_size
+        elif(rotate==2):
+            self.rotation += self.rotation_step_size
+        elif(rotate!=1):
+            print("invalid rotate value! Must be -1, 0 or 1!")
 
-        self.rotation_vector_x = np.sin(self.rotation)
-        self.rotation_vector_y = np.cos(self.rotation)
-        
-        self.coordinates[0][0] += self.speed*self.rotation_vector_x
-        self.coordinates[0][1] += self.speed*self.rotation_vector_y
+        self.coordinates[0][0] += self.speed*np.sin(self.rotation)
+        self.coordinates[0][1] += self.speed*np.cos(self.rotation)
         
         if(self.border):
             self.coordinates[0][0] %= 100

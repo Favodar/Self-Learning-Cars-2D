@@ -6,7 +6,7 @@ import random
 import numpy as np
 from car_physics import Car, Render, Ball
 
-class CustomEnv(gym.Env):
+class MultiCarGoalEnv(gym.GoalEnv):
   """Custom Environment that follows gym interface"""
   metadata = {'render.modes': ['human']}
 
@@ -65,50 +65,57 @@ class CustomEnv(gym.Env):
         self.action_space = spaces.MultiDiscrete(actionlist)
     else:
         self.action_space = spaces.Box(np.array([-1, 0]), np.array([2, 2]), dtype=np.float32)
+    #self.observation_space = spaces.Box(-np.inf, np.inf, shape=(3,2), dtype=np.float32) #self.number_of_cars,
+    obs = self.getObservation()
+    self.observation_space = spaces.Dict(dict(
+            desired_goal=spaces.Box(-np.inf, np.inf, shape=obs['desired_goal'].shape, dtype='float32'),
+            achieved_goal=spaces.Box(-np.inf, np.inf, shape=obs['achieved_goal'].shape, dtype='float32'),
+            observation=spaces.Box(-np.inf, np.inf, shape=obs['observation'].shape, dtype='float32'),
+        ))
+    self.observation = obs
 
 
-    self.observation_space = spaces.Box(-np.inf, np.inf, shape=(3,2), dtype=np.float32) #self.number_of_cars,
-    self.observation = self.getObservation()
 
 
 
   def step(self, action):
 
-    assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
-
+    #assert self.action_space.contains(action), "%r (%s) invalid"%(action, type(action))
     if not(self.static_enemy):
         enemy_action, _states = self.enemy_model.predict(self.getObservation(isEnemy=True))
         self.enemy_car.move(enemy_action[0], enemy_action[1])
     self.myCar.move(action[0], action[1])
 
     #self.renderSlow(50)
+    self.render()
 
     self.observation = self.getObservation()
 
     #print(observation)
-    reward = self.getReward(self.isEscaping)
+    # info = "I don't know what 'info' is supposed to contain."
+    info = {}
+    reward = self.compute_reward(self.observation['achieved_goal'], self.observation['desired_goal'], info)
 
     self.step_counter += 1
 
-    if(self.episode_counter%30==0):
-        self.renderSlow(400)
+    #if(self.episode_counter%30==0):
+    #    self.renderSlow(400)
 
     done = (self.episodeIsOver|(self.step_counter>=self.step_limit))
 
-    # info = "I don't know what 'info' is supposed to contain."
+    
 
-    return self.observation, reward, done, {} # info
+    return self.observation, reward, done, info # info
 
-  def getReward(self, isEscaping = False):
-      
-    coordinates1 = self.myCar.get2DpointList()[0]
-    coordinates2 = self.enemy_car.get2DpointList()[0]
 
-    xdistance = coordinates1[0] - coordinates2[0]
-    ydistance = coordinates1[1] - coordinates2[1]                
+
+  def compute_reward(self, achieved_goal, goal, info):
+
+    xdistance = achieved_goal[0] - goal[0]
+    ydistance = achieved_goal[1] - goal[1]                
     distance = math.sqrt(xdistance**2 + ydistance**2)
 
-    if(isEscaping):
+    if(self.isEscaping):
         if(self.binaryReward):
             if(distance<10):
                 self.episodeIsOver = True
@@ -147,6 +154,8 @@ class CustomEnv(gym.Env):
 
   def reset(self):
     #self.render()
+    print(str(self.observation))
+    super(MultiCarGoalEnv, self).reset()
 
     self.step_counter = 0
     self.episodeIsOver = False
@@ -158,14 +167,18 @@ class CustomEnv(gym.Env):
 
     self.observation = self.getObservation()
 
+    
+
+
     return self.observation  # reward, done, info can't be included
 
   def render(self, mode='human'):
     # Display current state of environment, including current reward
-    self.myRender.renderFrame(self.getReward(self.isEscaping))
+    self.myRender.renderFrame(self.compute_reward(self.observation['achieved_goal'], self.observation['desired_goal'], {}))
 
   def renderSlow(self, fps):
-    self.myRender.renderFrame(self.getReward(self.isEscaping))
+
+    self.myRender.renderFrame(self.compute_reward(self.observation['achieved_goal'], self.observation['desired_goal'], {}))
     time.sleep(1.0/fps)
 
 
@@ -185,10 +198,18 @@ class CustomEnv(gym.Env):
         return [x, y]
 
   def getObservation(self, isEnemy = False):
-      if(isEnemy):
-          return [[self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]],[self.enemy_car.coordinates[0][0], self.enemy_car.coordinates[0][1]],[self.enemy_car.speed, self.enemy_car.rotation]]
 
-      return [[self.enemy_car.coordinates[0][0], self.enemy_car.coordinates[0][1]],[self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]],[self.myCar.speed, self.myCar.rotation]]
+    if(isEnemy):
+        obs = np.array([[self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]],[self.enemy_car.coordinates[0][0], self.enemy_car.coordinates[0][1]],[self.enemy_car.speed, self.enemy_car.rotation]])
+        return obs
+    else:
+        obs = np.array([[self.enemy_car.coordinates[0][0], self.enemy_car.coordinates[0][1]],[self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]],[self.myCar.speed, self.myCar.rotation_vector_x, self.myCar.rotation_vector_y]])
+        
+    return {
+            'observation': np.concatenate(obs),
+            'achieved_goal': self.myCar.coordinates[0],
+            'desired_goal': self.enemy_car.coordinates[0]
+        }
 
   def resetCars(self):
       if(self.random_pos):

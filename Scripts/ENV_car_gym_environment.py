@@ -45,6 +45,7 @@ class CustomEnv(gym.Env):
     if(random_pos):
       self.observation_space = spaces.Box(-np.inf, np.inf, shape=(3,2), dtype=np.float32) #self.number_of_cars,
     else:
+      # if the target is not randomly positioned, its coordinates are always the same, therefore I decided to exclude them from the observation space in that case because they provide no useful information
       self.observation_space = spaces.Box(-np.inf, np.inf, shape=(2,2), dtype=np.float32) #self.number_of_cars,
       
 
