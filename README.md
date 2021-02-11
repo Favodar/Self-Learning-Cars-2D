@@ -6,7 +6,7 @@ In brief, this repository provides two things:
 
 This is a project I started as a fun excercise to improve my engineering skills in deep reinforcement learning.
 The task is not complex, but it's not so easy for the agent to solve the task and success is by no means a default outcome, which makes it an interesting challenge. 
-The main goals where to learn how to properly model and implement an environment that in some way represents the world, and to explore the effects on agent behaviour and performance of the following features:
+The main goals were to learn how to properly model and implement an environment that in some way represents the world, and to explore the effects on agent behaviour and performance of the following features:
 - different reward functions (sparse, shaped, non-linear etc.)
 - different observation spaces
 - different action spaces  
