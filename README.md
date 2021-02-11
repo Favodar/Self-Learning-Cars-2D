@@ -19,6 +19,7 @@ If you're interested in learning from this project, you could either only downlo
 Blue is simple radians rotation, green is the new rotation vector. This is just the simple case with a static defender, I expect the results to be even better when the defender is moving and the attacker might have to turn several times.*
 
 <img src="Pictures/rotvec_green_vs_rad_blue.png"/>
+  
 ## 1 The Scripts  
 
 <img src="Pictures/architecture.svg"/>  
