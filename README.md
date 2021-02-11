@@ -17,7 +17,8 @@ If you're interested in learning from this project, you could either only downlo
 ##### 2021-02-04
 *Up until now, the observed rotation is simply the saved radian value of the physics engine. This can be values above and beyond 2\*pi (or more than 360 degrees), which isn't an issue for the physics engine, but it means that the agent has to recognize that values above 2\*pi actually represent the same rotations that could be oberved below 2\*pi (e.g. that 0 degree and 720 degree correspond to the same rotation). This problem could be solved by returning the rotation modulo 2\*pi as observation, but would introduce the new issue that the agent has to learn that 6.283 and 0 are almost the same rotation, much more similar than, say 0.4 and 0. I think we would want the agent to conceptualize the rotation more like a knob that can be turned and where similar rotations always look similar, so right now I'm experimenting with giving the agent x and y coordinates that represent the rotation on the unit circle (like a knob with radius = 1) and the first results look promising :)*
 
-<img src="Pictures/rotvec_green_vs_rad_blue.png"/>
+<img src="Pictures/rotvec_green_vs_rad_blue.png"/>  
+
 *Blue is simple radians rotation, green is the new rotation vector. This is just the simple case with a static defender, I expect the results to be even better when the defender is moving and the attacker might have to turn several times.*  
 
 ## 1 The Scripts  
