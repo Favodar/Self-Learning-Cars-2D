@@ -19,7 +19,7 @@ If you're interested in learning from this project, you could either only downlo
 
 <img src="Pictures/rotvec_green_vs_rad_blue.png"/>  
 
-*Blue observes simple radians rotation, green's observation incluedes the new rotation vector. As you can see, in the end green almost reaches 100% success while blue still hovers around 84%. This is just the simple case with a static defender, I expect the results to be even better when the defender is moving and the attacker might have to turn several times.*  
+*Blue observes simple radians rotation, green's observation includes the new rotation vector. As you can see, in the end green almost reaches 100% success while blue still hovers around 84%. This is just the simple scenario with a static defender, I expect the results to be even better when the defender is moving and the attacker might have to turn several times, where the equivalences between rotations become more relevant.*  
 
 ## 1 The Scripts  
 
