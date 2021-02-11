@@ -67,8 +67,11 @@ class CustomEnv(gym.Env):
         self.action_space = spaces.Box(np.array([-1, 0]), np.array([2, 2]), dtype=np.float32)
 
 
-    self.observation_space = spaces.Box(-np.inf, np.inf, shape=(3,2), dtype=np.float32) #self.number_of_cars,
+    #self.observation_space = spaces.Box(-np.inf, np.inf, shape=(3,2), dtype=np.float32) #self.number_of_cars,
     self.observation = self.getObservation()
+
+    self.observation_space = spaces.Box(-np.inf, np.inf, shape=self.observation.shape, dtype='float32')
+
 
 
 
@@ -82,6 +85,7 @@ class CustomEnv(gym.Env):
     self.myCar.move(action[0], action[1])
 
     #self.renderSlow(50)
+    #self.render()
 
     self.observation = self.getObservation()
 
@@ -90,8 +94,8 @@ class CustomEnv(gym.Env):
 
     self.step_counter += 1
 
-    if(self.episode_counter%30==0):
-        self.renderSlow(400)
+    # if(self.episode_counter%30==0):
+    #     self.renderSlow(400)
 
     done = (self.episodeIsOver|(self.step_counter>=self.step_limit))
 
@@ -186,9 +190,15 @@ class CustomEnv(gym.Env):
 
   def getObservation(self, isEnemy = False):
       if(isEnemy):
-          return [[self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]],[self.enemy_car.coordinates[0][0], self.enemy_car.coordinates[0][1]],[self.enemy_car.speed, self.enemy_car.rotation]]
-
-      return [[self.enemy_car.coordinates[0][0], self.enemy_car.coordinates[0][1]],[self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]],[self.myCar.speed, self.myCar.rotation]]
+          obs = np.array([[self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]],[self.enemy_car.coordinates[0][0], self.enemy_car.coordinates[0][1]],[self.enemy_car.speed, self.enemy_car.rotation_vector_x, self.enemy_car.rotation_vector_y]])
+          return {
+              'observation': np.concatenate(obs),
+              'achieved_goal': self.enemy_car.coordinates[0],
+              'desired_goal': self.myCar.coordinates[0] 
+          }
+      else:
+          obs = np.array([[self.enemy_car.coordinates[0][0], self.enemy_car.coordinates[0][1]], [self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]], [self.myCar.speed, self.myCar.rotation_vector_x, self.myCar.rotation_vector_y]])
+      return np.concatenate(obs)
 
   def resetCars(self):
       if(self.random_pos):

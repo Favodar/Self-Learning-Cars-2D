@@ -87,7 +87,7 @@ class MultiCarGoalEnv(gym.GoalEnv):
     self.myCar.move(action[0], action[1])
 
     #self.renderSlow(50)
-    self.render()
+    #self.render()
 
     self.observation = self.getObservation()
 
@@ -98,8 +98,8 @@ class MultiCarGoalEnv(gym.GoalEnv):
 
     self.step_counter += 1
 
-    #if(self.episode_counter%30==0):
-    #    self.renderSlow(400)
+    if(self.episode_counter%5==0):
+        self.render()
 
     done = (self.episodeIsOver|(self.step_counter>=self.step_limit))
 
@@ -200,8 +200,8 @@ class MultiCarGoalEnv(gym.GoalEnv):
   def getObservation(self, isEnemy = False):
 
     if(isEnemy):
-        obs = np.array([[self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]],[self.enemy_car.coordinates[0][0], self.enemy_car.coordinates[0][1]],[self.enemy_car.speed, self.enemy_car.rotation]])
-        return obs
+        obs = np.array([[self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]],[self.enemy_car.coordinates[0][0], self.enemy_car.coordinates[0][1]],[self.enemy_car.speed, self.enemy_car.rotation_vector_x, self.enemy_car.rotation_vector_y]])
+        return np.concatenate(obs)
     else:
         obs = np.array([[self.enemy_car.coordinates[0][0], self.enemy_car.coordinates[0][1]],[self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]],[self.myCar.speed, self.myCar.rotation_vector_x, self.myCar.rotation_vector_y]])
         
