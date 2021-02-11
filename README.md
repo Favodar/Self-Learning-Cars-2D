@@ -22,7 +22,7 @@ Blue is simple radians rotation, green is the new rotation vector. This is just 
 ## 1 The Scripts  
 
 <img src="Pictures/architecture.svg"/>  
-
+  
 ### 1.1 The Gym Environment
 The scripts that start with "ENV". They are reinforcement learning environments, which means they are a Markov-decision-process. By implementing the common OpenAI Gym standard, they are compatible with many algorithms, like the RL-library "stable-baselines", which I used in the training scripts.
 ### 1.2 The Training Scripts
