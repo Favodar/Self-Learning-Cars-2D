@@ -1,7 +1,7 @@
 from env_params_class import Env_Params
 def save_env_parameters(filename, envparams: Env_Params):
     paramlist = [envparams.step_limit, envparams.step_size, envparams.maxspeed,
-                          envparams.acceleration, envparams.random_pos, envparams.binary_reward]
+                          envparams.acceleration, envparams.random_pos, envparams.binary_reward, envparams.discrete_actionspace]
     try:
         f = open("../Envparameters/envparameters_" + filename, "x")
         f.write(str(paramlist))
@@ -28,6 +28,10 @@ def load_env_parameters(filename) -> Env_Params:
                     float(f_list[3]),
                     bool(f_list[4]),
                     bool(f_list[5]))
+    
+    # Ensure backwards compatibility
+    if(len(f_list)>6):
+        env_params_obj.discrete_actionspace = bool(f_list[6])
     
     return env_params_obj
 

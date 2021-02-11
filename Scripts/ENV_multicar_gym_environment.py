@@ -129,7 +129,7 @@ class CustomEnv(gym.Env):
 
         return reward
 
-
+    # if not escaping (if attacking):
     else:
         #print ("distance = " + str(distance))
 
@@ -179,6 +179,14 @@ class CustomEnv(gym.Env):
 
 
   def getRandomPosition(self):
+        """
+        randomly selects a position where
+        0<x<10 or 90<x<100 and
+        0<y<10 or 90<y<100
+
+        Returns:
+          [int, int]: x,y coordinates randomly chosen within 4 boxes (upper left, upper right, lower left, lower right)
+        """
 
         sign1 = random.choice([1, -1])
         sign2 = random.choice([1, -1])

@@ -25,8 +25,7 @@ attacker_model_folder = "../Models/"
 attacker_tensorboard_folder = "../TensorboardLogs/HER-test"
 defender_tensorboard_folder = "../TensorboardLogs/HER-test"
 
-# scheduler = LinearSchedule(timesteps_per_turn, 0.001, 0.0001)
-# my_learning_rate = scheduler.value # 0.0005 
+
 
 # for dynamic LRs:
 lr_timesteps = 1000000
@@ -35,8 +34,9 @@ lr_end = 0.000063
 half_life = 0.1
 dyn_lr = ExpLearningRate(
     timesteps=lr_timesteps, lr_start=lr_start, lr_min=lr_end, half_life=half_life, save_interval=timesteps_per_turn)
-my_learning_rate = dyn_lr.value # 0.0005  # 0.000063 #scheduler.value # 0.0005 default: 2.5e-4=0.00025
-#scheduler = LinearSchedule(schedule_timesteps= timesteps,initial_p= lr_start, final_p = lr_end)
+my_learning_rate = dyn_lr.value # default: 2.5e-4=0.00025
+#scheduler = LinearSchedule(schedule_timesteps= timesteps_per_turn,initial_p= lr_start, final_p = lr_end)
+#my_learning_rate = scheduler.value # 0.0005
 
 #print_LR = str(my_learning_rate) 
 print_LR = str(lr_start) + "-" + str(lr_end)
@@ -47,8 +47,9 @@ attacker_maxspeed = 2.5
 attacker_acceleration = 2.5/2
 attacker_random_pos = True
 attacker_binaryReward = True
+attacker_discrete_actionspace = False
 
-attacker_params = car_utils.Env_Params(attacker_step_limit, attacker_turnrate, attacker_maxspeed, attacker_acceleration, attacker_random_pos, attacker_binaryReward)
+attacker_params = car_utils.Env_Params(attacker_step_limit, attacker_turnrate, attacker_maxspeed, attacker_acceleration, attacker_random_pos, attacker_binaryReward, attacker_discrete_actionspace)
 
 n_environments = False
 # Initialize stub environment to break vicious circle
@@ -87,7 +88,7 @@ attacker_name = "ATK6_H_nEnv_epsilon01_rotVec_rdmPos_HERSAC_" + "ep_length_" + s
  
 defender_model = PPO2(MlpPolicy, defender_env, learning_rate= my_learning_rate, verbose=1, tensorboard_log=defender_tensorboard_folder)
 
-attacker_env = GoalEnv(static_enemy=True,discrete_actionspace=False,random_pos=attacker_params.random_pos,step_limit=attacker_params.step_limit, step_size = attacker_params.step_size, maxspeed = attacker_params.maxspeed,acceleration=attacker_params.acceleration, binary_reward= attacker_params.binary_reward, isEscaping= False, enemy_model = defender_model, enemy_step_limit= defender_params.step_limit, enemy_step_size= defender_params.step_size, enemy_maxspeed= defender_params.maxspeed, enemy_acceleration= defender_params.acceleration)
+attacker_env = GoalEnv(static_enemy=True,discrete_actionspace= attacker_discrete_actionspace,random_pos=attacker_params.random_pos,step_limit=attacker_params.step_limit, step_size = attacker_params.step_size, maxspeed = attacker_params.maxspeed,acceleration=attacker_params.acceleration, binary_reward= attacker_params.binary_reward, isEscaping= False, enemy_model = defender_model, enemy_step_limit= defender_params.step_limit, enemy_step_size= defender_params.step_size, enemy_maxspeed= defender_params.maxspeed, enemy_acceleration= defender_params.acceleration)
 vectorized_attacker_env = DummyVecEnv([lambda: attacker_env])
 
 if(n_environments):
