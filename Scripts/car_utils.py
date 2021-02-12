@@ -1,7 +1,7 @@
 from env_params_class import Env_Params
-def save_env_parameters(filename, envparams: Env_Params):
+def saveEnvParameters(filename, envparams: Env_Params):
     paramlist = [envparams.step_limit, envparams.step_size, envparams.maxspeed,
-                          envparams.acceleration, envparams.random_pos, envparams.binary_reward]
+                          envparams.acceleration, envparams.random_pos, envparams.binary_reward, envparams.rotation_vector, envparams.discrete_actionspace]
     try:
         f = open("../Envparameters/envparameters_" + filename, "x")
         f.write(str(paramlist))
@@ -12,7 +12,7 @@ def save_env_parameters(filename, envparams: Env_Params):
             str(paramlist))
 
 
-def load_env_parameters(filename) -> Env_Params:
+def loadEnvParameters(filename) -> Env_Params:
 
     # Load signal parameters from file:
     f = open("../Envparameters/envparameters_" + filename, "r")
@@ -30,6 +30,18 @@ def load_env_parameters(filename) -> Env_Params:
                     bool(f_list[5]))
     
     return env_params_obj
+
+def showPreview(env, model, step_limit, episodes = 5, fps = 100):
+    for i in range(episodes):
+        obs = env.reset()
+        for i in range(step_limit):
+            action, _states = model.predict(obs)
+            print(action)
+            obs, rewards, dones, info = env.step(action)
+            env.renderSlow(fps)
+            if(dones):
+                env.renderSlow(1)
+                break
 
 
 
