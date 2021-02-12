@@ -16,7 +16,7 @@ class CustomEnv(gym.Env):
   step_counter = 0
   episode_counter = 0
   
-  def __init__(self, step_limit, step_size, maxspeed, acceleration, random_pos = False, binary_reward = False):
+  def __init__(self, step_limit, step_size, maxspeed, acceleration, random_pos = False, binary_reward = False, rotation_vector = False, flat_obs_space = False, discrete_actionspace = True):
 
     self.step_limit = step_limit
     self.step_size = step_size
@@ -24,6 +24,8 @@ class CustomEnv(gym.Env):
     self.acceleration = acceleration
     self.random_pos = random_pos
     self.binary_reward = binary_reward
+    self.rotation_vector = rotation_vector
+    self.flat_obs_space = flat_obs_space
 
     self.number_of_actions = 2
     self.number_of_cars = 1
@@ -40,12 +42,18 @@ class CustomEnv(gym.Env):
     # super(CustomEnv, self).__init__()
 
     actionlist = [3 for j in range(self.number_of_actions)]
-
-    self.action_space = spaces.MultiDiscrete(actionlist)
-    if(random_pos):
-      self.observation_space = spaces.Box(-np.inf, np.inf, shape=(3,2), dtype=np.float32) #self.number_of_cars,
+    if(discrete_actionspace):
+        self.action_space = spaces.MultiDiscrete(actionlist)
     else:
-      self.observation_space = spaces.Box(-np.inf, np.inf, shape=(2,2), dtype=np.float32) #self.number_of_cars,
+        self.action_space = spaces.Box(
+            np.array([-1, 0]), np.array([2, 2]), dtype=np.float32)
+
+    self.observation = self.getObservation()
+
+    if(flat_obs_space):
+      self.observation_space = spaces.Box(-np.inf, np.inf, shape=np.array(self.observation).shape, dtype=np.float32) #self.number_of_cars,
+    else:
+      self.observation_space = spaces.Box(-np.inf, np.inf, shape=(3,2), dtype=np.float32) #self.number_of_cars,
       
 
 
@@ -56,7 +64,7 @@ class CustomEnv(gym.Env):
 
     self.myCar.move(action[0], action[1])
 
-    #self.renderSlow(50)
+    #self.renderSlow(400)
 
 
 
@@ -67,8 +75,8 @@ class CustomEnv(gym.Env):
 
     self.step_counter += 1
 
-    # if(self.episode_counter%50==0):
-    #     self.renderSlow(400)
+    #if(self.episode_counter % 100 == 0):
+    #    self.renderSlow(400)
 
     done = (self.episodeIsOver|(self.step_counter>=self.step_limit))
 
@@ -78,8 +86,8 @@ class CustomEnv(gym.Env):
 
   def getReward(self):
 
-        coordinates1 = self.myCar.get2DpointList()[0]
-        coordinates2 = self.myBall.get2DpointList()[0]
+        coordinates1 = self.myCar.coordinates[0]
+        coordinates2 = self.myBall.coordinates[0]
 
         xdistance = coordinates1[0] - coordinates2[0]
         ydistance = coordinates1[1] - coordinates2[1]                
@@ -123,10 +131,10 @@ class CustomEnv(gym.Env):
     return observation  # reward, done, info can't be included
 
   def render(self, mode='human'):
-    self.myRender.renderFrame(self.getReward())
+    self.myRender.renderFrame(self.getReward(), self.episode_counter)
 
   def renderSlow(self, fps):
-    self.myRender.renderFrame(self.getReward())
+    self.myRender.renderFrame(self.getReward(), self.episode_counter)
     time.sleep(1.0/fps)
 
 
@@ -147,7 +155,10 @@ class CustomEnv(gym.Env):
 
   def getObservation(self):
 
-    if(self.random_pos):
-      return [[self.myBall.coordinates[0][0], self.myBall.coordinates[0][1]],[self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]],[self.myCar.speed, self.myCar.rotation]]
+    if not (self.rotation_vector):
+      if(self.flat_obs_space):
+        return [self.myBall.coordinates[0][0], self.myBall.coordinates[0][1], self.myCar.coordinates[0][0], self.myCar.coordinates[0][1], self.myCar.speed, self.myCar.rotation]
+      else:
+        return [[self.myBall.coordinates[0][0], self.myBall.coordinates[0][1]],[self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]],[self.myCar.speed, self.myCar.rotation]]
     else:
-      return [[self.myCar.coordinates[0][0], self.myCar.coordinates[0][1]],[self.myCar.speed, self.myCar.rotation]]
+      return [self.myBall.coordinates[0][0], self.myBall.coordinates[0][1], self.myCar.coordinates[0][0], self.myCar.coordinates[0][1], self.myCar.speed, self.myCar.rotation_vector_x, self.myCar.rotation_vector_y]
