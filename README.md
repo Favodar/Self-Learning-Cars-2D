@@ -2,7 +2,7 @@
 A toy environment for reinforcement learning (a goal-oriented machine learning technique). In the single-agent version, a car is given the task of driving to a randomly assigned target. In the multi-agent version, one car chases and the other car tries to escape.  
 In brief, this repository provides two things:  
 - a reinforcement learning environment (implementing the common OpenAI Gym standard) (see 1.1 for more information)
-- scripts for executing succesful training with PPO (HER + SAC in the works) (see 1.2 for more information)
+- scripts that use the [stable-baselines library](https://stable-baselines.readthedocs.io/en/master/index.html) for executing succesful training with PPO (HER + SAC in the works) (see 1.2 for more information)
 
 This is a project I started as a fun excercise to improve my engineering skills in deep reinforcement learning.
 The task is not complex, but it's not so easy for the agent to solve the task and success is by no means a default outcome, which makes it an interesting challenge. 
@@ -20,6 +20,20 @@ If you're interested in learning from this project, you could either only downlo
 <img src="Pictures/rotvec_green_vs_rad_blue.png"/>  
 
 *Blue observes simple radians rotation, green's observation includes the new rotation vector. As you can see, in the end green almost reaches 100% success while blue still hovers around 84%. This is just the simple scenario with a static defender, I expect the results to be even better when the defender is moving and the attacker might have to turn several times, where the equivalences between rotations become more relevant.*  
+
+## 0 Setup
+To be able to run the scripts, you need python 3, and the following python libraries:
+- numpy
+- tensorflow
+- gym
+- stable-baselines  
+When using Ubuntu or another Linux distributions (which I recommend for projects like these), python 3 is likely already installed and the libraries can simply be installed in the terminal via
+```pip3 install numpy``` etc.  
+To install the stable-baselines library, [follow these instructions](https://stable-baselines.readthedocs.io/en/master/guide/install.html).  
+For faster training, tensorflow can be run on the GPU instead of the CPU. If you have a new-ish nvidia GPU, you're in luck, as it supports this kind of GPU acceleration. 
+#### 0.1 GPU acceleration (for advanced users)
+Warning: if you want to use GPU acceleration by running tensorflow on the GPU, note that stable-baselines **does not support tensorflow 2!** From their website: "Stable-Baselines supports Tensorflow versions from 1.8.0 to 1.15.0, and does not work on Tensorflow versions 2.0.0 and above." This means that not only will you have to specifically download an older tensorflow version (note that older tensorflow versions require you to specifically install "tensorflow-gpu"), you will also have to install an older CUDA version that's compatible with the tensorflow-gpu version, which in turn will require a compatible nvidia driver version and a a compatible cuDNN version... yea, it will probably be painful to get it running.
+
 
 ## 1 The Scripts  
 
