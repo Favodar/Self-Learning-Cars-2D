@@ -1,5 +1,6 @@
 # Self-Learning-Cars-2D
-A toy environment for reinforcement learning (a goal-oriented machine learning technique). In the single-agent version, a car is given the task of driving to a randomly assigned target. In the multi-agent version, one car chases and the other car tries to escape.  
+A toy environment for reinforcement learning (a goal-oriented machine learning technique). In the single-agent version, a "car" is given the task of driving to a randomly assigned target. In the multi-agent version, one car chases and the other car tries to escape.  
+
 <img src="Pictures/cars1.gif" alt="drawing" width="300"/>
 <img src="Pictures/cars2.gif" alt="drawing" width="300"/>
 
