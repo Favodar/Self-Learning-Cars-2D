@@ -27,8 +27,7 @@ def loadEnvParameters(filename) -> Env_Params:
                     float(f_list[2]),
                     float(f_list[3]),
                     bool(f_list[4]),
-                    bool(f_list[5]))
-    
+                    bool(f_list[5]))  
     return env_params_obj
 
 def showPreview(env, model, step_limit, episodes = 5, fps = 100):
@@ -42,6 +41,7 @@ def showPreview(env, model, step_limit, episodes = 5, fps = 100):
             if(dones):
                 env.renderSlow(1)
                 break
+
 
 
 

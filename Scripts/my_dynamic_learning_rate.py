@@ -1,3 +1,5 @@
+from stable_baselines.common.schedules import ConstantSchedule, LinearSchedule
+
 class ExpLearningRate():
 
     """
@@ -22,7 +24,7 @@ class ExpLearningRate():
         self.counter = 1
 
     def value(self, step):
-        #print(str(step))
+        print("step:" + str(step))
         if(self.save_interval==0):
             s = (self.timesteps-(step*self.timesteps))
         else:
@@ -33,3 +35,40 @@ class ExpLearningRate():
 
     def count(self):
         self.counter += 1
+
+class LearningRate():
+    
+    dyn_lr = None
+    
+    def __init__(self, lr_function, timesteps, save_interval, lr_start, lr_min=0, half_life=0.5, use_recommended_hyperparams = False):
+        
+        self.lr_string = lr_function + "_"
+        if(use_recommended_hyperparams):
+            lr_start = 0.0005
+            lr_min = 0.00025 #lr_end = 0.000063
+            half_life = 0.5
+        
+        if(lr_function=="linear"):
+            my_learning_rate = LinearSchedule(timesteps, lr_start, lr_min).value  # default: 0.00025
+            if(save_interval!=0):
+                print("Warning: linear learning rates are possibly broken when training is paused and resumed (i.e. if preview is enabled)")
+
+        elif(lr_function=="exponential"):
+            # for exponentially decaying learning rates:
+
+
+            self.dyn_lr = ExpLearningRate(
+                timesteps=timesteps, lr_start=lr_start, lr_min=lr_min, half_life=half_life, save_interval=save_interval) # add save_interval parameter when preview is on!
+            self.my_learning_rate = self.dyn_lr.value
+            self.lr_string += str(lr_start) + "-" + str(lr_min) + "_"
+            if(save_interval!=0):
+                print("Warning: When using decaying learning rates and training happens in intervals, the LearningRate.count() function must be called after each interval, or the decay will not work properly!")
+
+        else:
+            self.my_learning_rate = lr_start
+            if(lr_function!="static"):
+                print("No learning rate function of the name " + lr_function + " was found! Defaulting to static learning rate.")
+
+    def count(self):
+        if(self.dyn_lr!=None):
+            self.dyn_lr.count()

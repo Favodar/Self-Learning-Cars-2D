@@ -33,8 +33,7 @@ if(dynamicLR):
         timesteps=lr_timesteps, lr_start=lr_start, lr_min=lr_end, half_life=half_life)
     my_learning_rate = dyn_lr.value
     lr_string = "dynLR" + str(lr_start) + "-" + str(lr_end) + "_"
-#print_LR = str(my_learning_rate) 
-print_LR = str(lr_start) + "-" + str(lr_end)
+
 
 attacker_step_limit = 200
 attacker_turnrate = 0.01745*(11.25/2)
@@ -82,8 +81,8 @@ attacker_env = MultiEnv(random_pos=attacker_params.random_pos,step_limit=attacke
 vectorized_attacker_env = DummyVecEnv([lambda: attacker_env])
 attacker_model.set_env(vectorized_attacker_env)
 
-car_utils.save_env_parameters(attacker_name, attacker_params)
-car_utils.save_env_parameters(defender_name, defender_params)
+car_utils.saveEnvParameters(attacker_name, attacker_params)
+car_utils.saveEnvParameters(defender_name, defender_params)
 
 # Init learning
 attacker_model.learn(total_timesteps=200000, tb_log_name= attacker_name + "INIT")
@@ -94,7 +93,9 @@ showPreview = True
 for i in range(1, 10000):
     defender_model.learn(total_timesteps=timesteps_per_turn, tb_log_name= defender_name, log_interval=100, reset_num_timesteps=False)
     attacker_model.learn(total_timesteps= timesteps_per_turn, tb_log_name= attacker_name, log_interval=100, reset_num_timesteps=False)
-    dyn_lr.count()
+
+    if(dynamicLR):
+        dyn_lr.count()
 
     if(i%10==0):
         attacker_model.save(attacker_model_folder + attacker_name+str(i*timesteps_per_turn))

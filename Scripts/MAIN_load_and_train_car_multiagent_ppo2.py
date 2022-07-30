@@ -120,8 +120,8 @@ showPreview = False
 # The training process
 for i in range(1, 10000):
     # Defender and attacker take turns in training (stable baselines does not support multiagent training)
-    attacker_model.learn(total_timesteps= timesteps_per_turn, tb_log_name= attacker_name + str(i), log_interval=100)
-    defender_model.learn(total_timesteps=timesteps_per_turn, tb_log_name= defender_name + str(i), log_interval=100)
+    attacker_model.learn(total_timesteps= timesteps_per_turn, tb_log_name= attacker_name + str(i), log_interval=100, reset_num_timesteps=False)
+    defender_model.learn(total_timesteps=timesteps_per_turn, tb_log_name= defender_name + str(i), log_interval=100, reset_num_timesteps=False)
     
     
     if(dynamicLR):
@@ -129,9 +129,9 @@ for i in range(1, 10000):
 
     if(i%2==0):
         attacker_model.save(
-            "../Models/" + attacker_name+str(i*timesteps_per_turn))
+            attacker_model_folder + attacker_name+str(i*timesteps_per_turn))
         defender_model.save(
-            "../Models/" + defender_name+str(i*timesteps_per_turn))
+            defender_model_folder + defender_name+str(i*timesteps_per_turn))
         
         # If preview is turned on, every so often the agents demonstrate what they have learned:
         if(showPreview):

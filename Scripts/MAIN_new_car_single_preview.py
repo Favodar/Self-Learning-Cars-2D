@@ -9,27 +9,26 @@ from stable_baselines import PPO2, SAC, HER
 from stable_baselines.common.schedules import ConstantSchedule, LinearSchedule
 
 from ENV_car_gym_environment import CustomEnv
-from my_dynamic_learning_rate import ExpLearningRate
+from my_dynamic_learning_rate import ExpLearningRate, LearningRate
 import car_utils
 
 timesteps = 1000000
+preview_on = True
+preview_count = 10
 #my_learning_rate = LinearSchedule(timesteps, 0.005, 0.0001).value  # default: 0.00025
-my_learning_rate = 0.0005
-lr_string = "linearSchedule_"
-dynamicLR = False
-if(dynamicLR):
-    # for dynamic LRs:
-    lr_start = 0.0005
-    lr_end = 0.00025
-    #lr_end = 0.000063
-    half_life = 0.5
-    dyn_lr = ExpLearningRate(
-        timesteps=timesteps, lr_start=lr_start, lr_min=lr_end, half_life=half_life)
-    my_learning_rate = dyn_lr.value
-    lr_string = "dynLR" + str(lr_start) + "-" + str(lr_end) + "_"
+
+lr_function = "exponential" # static, linear or exponential
+save_interval = 0
+if(preview_on):
+    save_interval = timesteps/preview_count
+
+lr_obj = LearningRate(lr_start=0.0005, lr_min=0.00025, half_life=0.5, lr_function=lr_function, timesteps=timesteps, save_interval=save_interval)
+my_learning_rate = lr_obj.my_learning_rate
+dyn_lr = lr_obj.dyn_lr
+lr_string = lr_obj.lr_string
 
 attacker_model_folder = "../Models/"
-attacker_tensorboard_folder = "/home/ryuga/Documents/TensorBoardLogs/2021_CARSTRIAL"
+attacker_tensorboard_folder = "../TensorboardLogs/2021_CARSTRIAL"
 algorithm = "PPO2"
 attacker_seed = 1
 
@@ -42,7 +41,7 @@ attacker_binary_reward = True
 attacker_rotation_vector = True
 attacker_flat_obs_space = True
 attacker_discrete_actionspace = True
-custom_neural_net = "None"
+custom_neural_net = "CD6"
 
 attacker_params = car_utils.Env_Params(attacker_step_limit, attacker_step_size,
                                        attacker_maxspeed, attacker_acceleration, attacker_random_pos, attacker_binary_reward, attacker_rotation_vector, attacker_discrete_actionspace)
@@ -69,7 +68,7 @@ else:
 # env = DummyVecEnv([lambda: env])
 
 
-name = "2021_" + algorithm + "_CARS_LR_"  + lr_string + "timesteps_" + str(timesteps) + "seed_" + str(attacker_seed)  + attacker_params.toString()
+name = "2022_newLRclass_" + algorithm + "_CARS_LR_"  + lr_string + "timesteps_" + str(timesteps) + "seed_" + str(attacker_seed)  + attacker_params.toString()
 
 # CRAZYDEEP6:
 p_quarks = dict(net_arch=[dict(
@@ -89,12 +88,17 @@ elif(algorithm=="HER"):
     model = HER('MlpPolicy', attacker_env, model_class=SAC,
                          random_exploration=0.1, verbose=1, tensorboard_log=attacker_tensorboard_folder)
 
-for i in range(10):
-    model.learn(total_timesteps=timesteps//10, tb_log_name= name)
-    preview_env.episode_counter = ((timesteps//10)//attacker_step_limit*i)
-    car_utils.showPreview(preview_env, model, attacker_step_limit)
-    my_learning_rate = my_learning_rate*0.9
-    model.learning_rate = my_learning_rate
+
+if not preview_on:
+    model.learn(total_timesteps=timesteps, tb_log_name= name)
+else:
+    for i in range(preview_count):
+        model.learn(total_timesteps=timesteps//preview_count, tb_log_name= name, reset_num_timesteps=False)
+        preview_env.episode_counter = ((timesteps//preview_count)//attacker_step_limit*i)
+        dyn_lr.count()
+        car_utils.showPreview(preview_env, model, attacker_step_limit)
+        #my_learning_rate = my_learning_rate*0.9
+        #model.learning_rate = my_learning_rate
 
 
 model.save(attacker_model_folder + name)

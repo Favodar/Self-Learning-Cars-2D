@@ -12,9 +12,9 @@ from ENV_car_gym_environment import CustomEnv
 from my_dynamic_learning_rate import ExpLearningRate
 import car_utils
 
-timesteps = 1000000
+timesteps = 100000
 attacker_model_folder = "../Models/"
-attacker_tensorboard_folder = "/home/ryuga/Documents/TensorBoardLogs/2021_CARSTRIAL"
+attacker_tensorboard_folder = "../TensorboardLogs/2021_CARSTRIAL"
 algorithm = "PPO2"
 attacker_seed = 1
 

@@ -34,10 +34,10 @@ class Car(Object2D):
         self.coordinates = np.array([[x_pos, y_pos],])
         self.speed = 0
 
-        print("Car initialized.")
-        print("rotation_step_size = " + str(self.rotation_step_size))
-        print("maxspeed = " + str(maxspeed))
-        print("joint coordinates:" +str(self.coordinates))
+        # print("Car initialized.")
+        # print("rotation_step_size = " + str(self.rotation_step_size))
+        # print("maxspeed = " + str(maxspeed))
+        # print("joint coordinates:" +str(self.coordinates))
     
     def move(self, gaspedal=0, rotate=0):
 
